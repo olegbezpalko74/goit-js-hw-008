@@ -1,48 +1,40 @@
-import storage from './storage';
+import throttle from 'lodash.throttle';
 
-const LOCALSTORAGE_KEY = 'feedback-form-state';
+const formEl = document.querySelector('.feedback-form');
+const inputEl = document.querySelector('feedback-form input');
+const textereaEl = document.querySelector('feedback-form texterea');
 
-const formRef = document.querySelector('.feedback-form');
-loadPage();
+const USER_FORM_DATE = "feedback-form-state";
 
-formRef.addEventListener('input', throttle(onAddDataInput, 500));
 
-function onAddDataInput(e) {
-  const { name, value } = e.target;
-  let savedData = storage.load(LOCALSTORAGE_KEY);
-  savedData = savedData ? savedData : {};
-  savedData[name] = value;
-  storage.save(LOCALSTORAGE_KEY, savedData);
-}
 
-function loadPage() {
-  const savedData = storage.load(LOCALSTORAGE_KEY);
 
-  if (savedData) {
-    Object.entries(savedData).forEach(([name, value]) => {
-      formRef.elements[name].value = value;
-    });
+let formDataValues = {};
+
+
+const onFormInput = event => {
+  formDataValues[event.target.name] = event.target.value;
+  localStorage.setItem(USER_FORM_DATE, JSON.stringify(formDataValues));
+};
+
+const onFormSubmit = event => {
+  event.preventDefauld();
+  if (inputEl.value !== '' && textereaEl.value !== '') {
+    console.log(formDataValues);
+    localStorage.removeItem(USER_FORM_DATE);
+    event.target.reset();
+    return ;
   }
-}
+  alert("All fields are required to be filled");
+};
 
-formRef.addEventListener('submit', onFormSubmit);
-
-function onFormSubmit(e) {
-  e.preventDefault();
-  console.log(e.currentTarget);
-  const {
-    elements: { email, message },
-  } = e.currentTarget;
-
-  if (email.value === '' || message.value === '') {
-    return console.log('Please fill in all the fields!');
+const populateFormDate = () => {
+  const savedFormDate = localStorage.getItem(USER_FORM_DATE);
+  if (savedFormDate) {
+    formDataValues =JSON.parse(savedFormDate);
+    inputEl.value = formDataValues.email || '';
+    textereaEl.value = formDataValues.message || '';
   }
-  const formData = {
-    email: email.value,
-    message: message.value,
-  };
+};
 
-  console.log(formData);
-  storage.remove(LOCALSTORAGE_KEY);
-  e.currentTarget.reset();
-}
+
