@@ -1,40 +1,59 @@
-import throttle from 'lodash.throttle';
-
-const formEl = document.querySelector('.feedback-form');
-const inputEl = document.querySelector('feedback-form input');
-const textereaEl = document.querySelector('feedback-form texterea');
-
-const USER_FORM_DATE = "feedback-form-state";
+import throttle from "lodash.throttle";
 
 
+const STORAGE_KEY = 'feedback-form-state';
 
-
-let formDataValues = {};
-
-
-const onFormInput = event => {
-  formDataValues[event.target.name] = event.target.value;
-  localStorage.setItem(USER_FORM_DATE, JSON.stringify(formDataValues));
+const formData = {};
+const refs = {
+  form: document.querySelector('.feedback-form'),
+  textarea: document.querySelector('.feedback-form textarea'),
 };
 
-const onFormSubmit = event => {
-  event.preventDefauld();
-  if (inputEl.value !== '' && textereaEl.value !== '') {
-    console.log(formDataValues);
-    localStorage.removeItem(USER_FORM_DATE);
-    event.target.reset();
-    return ;
+refs.form.addEventListener('submit', onFormSubmit);
+refs.textarea.addEventListener('input', throttle(onTextareaInput, 500));
+
+refs.form.addEventListener('input', e => {
+
+  formData[e.target.name] = e.target.value;
+  //  console.log(formData);
+   localStorage.setItem("formdata", JSON.stringify(formData));
+     console.log(localStorage.getItem("formdata"));
+
+});
+
+populateTextarea()
+
+
+function onFormSubmit(evt) {
+  evt.preventDefault();
+
+  console.log('Отправляем форму');
+
+  evt.currentTarget.reset();
+   localStorage.removeItem(STORAGE_KEY);
+}
+
+
+function onTextareaInput(evt) {
+  const message = evt.target.value;
+
+  localStorage.setItem(STORAGE_KEY, message);
+
+}
+
+function populateTextarea() {
+  const savedMessage = localStorage.getItem(STORAGE_KEY);
+  if (savedMessage) {
+     console.log(savedMessage);
+    refs.textarea.value = savedMessage;
+
   }
-  alert("All fields are required to be filled");
-};
 
-const populateFormDate = () => {
-  const savedFormDate = localStorage.getItem(USER_FORM_DATE);
-  if (savedFormDate) {
-    formDataValues =JSON.parse(savedFormDate);
-    inputEl.value = formDataValues.email || '';
-    textereaEl.value = formDataValues.message || '';
-  }
-};
+}
+
+
+
+
+
 
 
