@@ -12,7 +12,7 @@ const refs = {
 refs.form.addEventListener('submit', onFormSubmit);
 refs.form.addEventListener('input', throttle( e => {
   formData[e.target.name] = e.target.value;
-   localStorage.setItem("formdata", JSON.stringify(formData));
+   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
     
 
 }), 500);
